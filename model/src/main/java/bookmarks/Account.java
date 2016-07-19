@@ -12,16 +12,24 @@ import java.util.Set;
 @Entity
 public class Account {
 
-    @OneToMany(mappedBy = "account")
-    private Set<Bookmark> bookmarks = new HashSet<>();
-
     @Id
     @GeneratedValue
     private Long id;
 
+    @OneToMany(mappedBy = "account")
+    private Set<Bookmark> bookmarks = new HashSet<>();
+
     @JsonIgnore
     private String password;
     private String userName;
+
+    public Account() { // JPA only
+    }
+
+    public Account(String userName, String password) {
+        this.userName = userName;
+        this.password = password;
+    }
 
     public Set<Bookmark> getBookmarks() {
         return bookmarks;
@@ -39,11 +47,8 @@ public class Account {
         return userName;
     }
 
-    public Account(String password, String userName) {
-        this.password = password;
-        this.userName = userName;
-    }
-
-    public Account() { // JPA only
+    @Override
+    public String toString() {
+        return id + " - " + userName + ":" + password;
     }
 }

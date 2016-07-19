@@ -21,37 +21,36 @@ public class BookmarkRestController {
         this.accountRepository = accountRepository;
     }
 
+    private void validateUser(String userId) {
+        this.accountRepository.findByUserName(userId).orElseThrow(() -> new UserNotFoundException(userId));
+    }
+
     @RequestMapping(method = RequestMethod.POST)
     ResponseEntity<?> add(@PathVariable String userId, @RequestBody Bookmark input) {
-        this.validateUser(userId, "add");
-        return this.accountRepository.findByUserName(userId)
-                .map(
-                        account -> {
-                            Bookmark result = bookmarkRepository.save(new Bookmark(account, input.getUri(), input.getDescription()));
+        this.validateUser(userId);
+        return this.accountRepository.findByUserName(userId).map(
+                account -> {
+                    Bookmark result = bookmarkRepository.save(new Bookmark(account, input.getUri(), input.getDescription()));
 
-                            HttpHeaders httpHeaders = new HttpHeaders();
-                            httpHeaders.setLocation(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                                    .buildAndExpand(result.getId())
-                                    .toUri());
-                            return new ResponseEntity<>(null, httpHeaders, HttpStatus.CREATED);
-                        }
-                ).get();
+                    HttpHeaders httpHeaders = new HttpHeaders();
+                    httpHeaders.setLocation(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                            .buildAndExpand(result.getId())
+                            .toUri());
+                    return new ResponseEntity<>(null, httpHeaders, HttpStatus.CREATED);
+                }
+        ).get();
 
     }
 
     @RequestMapping(value = "/{bookmarkId}", method = RequestMethod.GET)
     Bookmark readBookmark(@PathVariable String userId, @PathVariable Long bookmarkId) {
-        this.validateUser(userId, "readBookmark");
+        this.validateUser(userId);
         return this.bookmarkRepository.findOne(bookmarkId);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     Collection<Bookmark> readBookmarks(@PathVariable String userId) {
-        this.validateUser(userId, "readBookmarks");
+        this.validateUser(userId);
         return this.bookmarkRepository.findByAccountUserName(userId);
-    }
-
-    private void validateUser(String userId, String invokedFrom) {
-        this.accountRepository.findByUserName(userId).orElseThrow(() -> new UserNotFoundException(userId + " " + invokedFrom));
     }
 }

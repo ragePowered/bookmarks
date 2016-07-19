@@ -10,13 +10,13 @@ import javax.persistence.ManyToOne;
 @Entity
 public class Bookmark {
 
-    @JsonIgnore
-    @ManyToOne
-    private Account account;
-
     @Id
     @GeneratedValue
     private Long id;
+
+    @JsonIgnore
+    @ManyToOne
+    private Account account;
 
     private String uri;
     private String description;
@@ -44,5 +44,10 @@ public class Bookmark {
 
     public String getDescription() {
         return description;
+    }
+
+    @Override
+    public String toString() {
+        return id + " - " + uri + " -> " + account.getUserName();
     }
 }
